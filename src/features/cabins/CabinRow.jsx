@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { formatCurrency } from "../../utils/helpers";
 
 const TableRow = styled.div`
   display: grid;
@@ -44,10 +45,10 @@ function CabinRow({ cabin }) {
     <TableRow role="row">
       <Img src={cabin.image} alt={cabin.name} />
       <Cabin>{cabin.name}</Cabin>
-      <div>{cabin.maxCapacity}</div>
-      <Price>€{cabin.regularPrice}</Price>
-      <Discount>{cabin.discount}%</Discount>
-      <button>Book</button>
+      <div>Fits up to {cabin.maxCapacity}</div>
+      <Price>{formatCurrency(cabin.regularPrice)}</Price>
+      <Discount>{formatCurrency(cabin.discount)}%</Discount>
+      <button>Delete</button>
     </TableRow>
   );
 }
