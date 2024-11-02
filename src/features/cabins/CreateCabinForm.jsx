@@ -44,12 +44,14 @@ const Error = styled.span`
 `;
 
 function CreateCabinForm() {
+  // This is the hook that will help us handle the form
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
+  // This function will be called when the form is submitted
   function onSubmit(data) {
     console.log(data);
   }
