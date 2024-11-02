@@ -62,9 +62,7 @@ function CabinRow({ cabin }) {
     onSuccess: () => {
       toast.success("Cabin deleted successfully");
       // When mutation is successful, invalidate the cache
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"], // This is the query key we want to invalidate
-      });
+      queryClient.invalidateQueries(["cabins"]); // This will refetch the data
     },
     onError: (error) => {
       toast.error(error.message);
