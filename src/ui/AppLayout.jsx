@@ -18,13 +18,23 @@ const Main = styled.main`
   background-color: var(--color-grey-50);
 `;
 
+const Container = styled.div`
+  max-width: 120rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3.2rem;
+`;
+
 function AppLayout() {
   return (
     <StyledAppLayout>
       <Header />
       <Sidebar />
       <Main>
-        <Outlet /> {/* // This is where the child routes will be rendered */}
+        <Container>
+          <Outlet /> {/* // This is where the child routes will be rendered */}
+        </Container>
       </Main>
     </StyledAppLayout>
   );
