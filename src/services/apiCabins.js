@@ -27,20 +27,31 @@ export async function deleteCabin(id) {
   return data;
 }
 
-// 03 - CREATE A CABIN
+// 03 - CREATE and EDIT A CABIN
 
-export async function createCabin(newCabin) {
+export async function createEditCabin(newCabin, id) {
+  // Check if the image path is already a supabase URL
+  const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl);
   // Generate a random image name
   // This is to avoid conflicts when uploading images
   const imageName = `${Math.random().toString(36).substring(2)}-${
     newCabin.image.name
   }`.replaceAll("/", "");
-  const imagePath = `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
+  // If the image path is already a supabase URL, we don't need to upload it
+  const imagePath = hasImagePath
+    ? newCabin.image
+    : `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
 
-  // 1. Create Cabin
-  const { data, error } = await supabase
-    .from("cabins")
-    .insert([{ ...newCabin, image: imagePath }]);
+  // 1. Create/edit Cabin
+  let query = supabase.from("cabins");
+  // A) CREATE
+  // id prop determines if we are creating or editing a cabin
+  if (!id) query = query.insert([{ ...newCabin, image: imagePath }]);
+  // B) EDIT
+  // If we are editing, we need to update the cabin
+  if (id) query = query.update({ ...newCabin, image: imagePath }).eq("id", id);
+
+  const { data, error } = await query.select().single();
 
   if (error) {
     console.error("Error creating cabin", error.message);
@@ -48,8 +59,6 @@ export async function createCabin(newCabin) {
   }
 
   // 2. Upload image
-  // https://pgyrwbpvbvtmppfjykfp.supabase.co/storage/v1/object/public/cabin-images/cabin-001.jpg
-
   const { error: storageError } = await supabase.storage
     .from("cabin-images")
     .upload(imageName, newCabin.image);

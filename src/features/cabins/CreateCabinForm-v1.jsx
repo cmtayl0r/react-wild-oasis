@@ -8,37 +8,26 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { createEditCabin } from "../../services/apiCabins";
+import { createCabin } from "../../services/apiCabins";
 import FormRow from "../../ui/FormRow";
 
 const Label = styled.label`
   font-weight: 500;
 `;
 
-function CreateCabinForm({ cabinToEdit = {} }) {
-  // We need to extract the id from the cabinToEdit object
-  // And then we can use the rest operator to get the rest of the values
-  const { id: editId, ...editValues } = cabinToEdit;
-  // Determine if we are editing a cabin
-  const isEditSession = Boolean(editId);
-
-  // Initialize the form
+function CreateCabinForm() {
+  // This is the hook that will help us handle the form
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({
-    defaultValues: isEditSession ? editValues : {}, // If we are editing a cabin, we need to pass the default values
-  });
-
+  } = useForm();
   // This is the hook that will help us refetch the data
   const queryClient = useQueryClient();
-
-  // CREATE MUTATION
   // This is the hook that will help us send the data to the server
-  const { mutate: createMutate, isLoading: isCreating } = useMutation({
-    mutationFn: createEditCabin,
+  const { mutate, isLoading: isCreating } = useMutation({
+    mutationFn: createCabin,
     onSuccess: () => {
       toast.success("Cabin created successfully"); // This will show a success message
       queryClient.invalidateQueries(["cabins"]); // This will refetch the data
@@ -49,38 +38,15 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       toast.error("Error creating cabin");
     },
   });
-
-  // EDIT MUTATION
-  // This is the hook that will help us send the data to the server
-  const { mutate: editMutate, isLoading: isEditing } = useMutation({
-    // We need to pass the id of the cabin we are editing
-    mutationFn: ({ newCabinData, id }) => createEditCabin(newCabinData, id),
-    onSuccess: () => {
-      toast.success("Cabin edited successfully"); // This will show a success message
-      queryClient.invalidateQueries(["cabins"]); // This will refetch the data
-      reset(); // This will reset the form
-    },
-    onError: (error) => {
-      console.error("Error editing cabin", error.message);
-      toast.error("Error editing cabin");
-    },
-  });
-
-  // This is a ternary operator that will determine which mutation to use
-  const isWorking = isCreating || isEditing;
-
   // This function will be called when the form is submitted
   function onSubmit(data) {
-    // Check if the image is a string or an array
-    // If it's an array, we need to get the first element
-    // If it's a string, we can use it as is
-    const image = typeof data.image === "string" ? data.image : data.image[0];
-
-    // If we are editing a cabin, we need to call the edit mutation
-    if (isEditSession)
-      editMutate({ newCabinData: { ...data, image }, id: editId });
-    // else we need to call the create mutation
-    else createMutate({ ...data, image: image });
+    // We need to send the image as a file, not as a FileList
+    // So we need to get the first file from the FileList
+    // And then we can send it to the server
+    // We can do this by using the spread operator
+    // This will create a new object with all the properties of the data object
+    // And then we can override the image property with the first file from the FileList
+    mutate({ ...data, image: data.image[0] });
   }
 
   return (
@@ -98,7 +64,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           {...register("name", {
             required: "This field is required",
           })}
-          disabled={isWorking}
+          disabled={isCreating}
           style={
             errors.name ? { border: "3px solid var(--color-red-700)" } : {}
           }
@@ -116,7 +82,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
               message: "The maximum capacity is 20 people",
             },
           })}
-          disabled={isWorking}
+          disabled={isCreating}
           style={
             errors.maxCapacity
               ? { border: "3px solid var(--color-red-700)" }
@@ -134,7 +100,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           {...register("regularPrice", {
             required: "This field is required",
           })}
-          disabled={isWorking}
+          disabled={isCreating}
           style={
             errors.regularPrice
               ? { border: "3px solid var(--color-red-700)" }
@@ -151,7 +117,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           {...register("discount", {
             required: "This field is required",
           })}
-          disabled={isWorking}
+          disabled={isCreating}
           style={
             errors.discount ? { border: "3px solid var(--color-red-700)" } : {}
           }
@@ -168,7 +134,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           {...register("description", {
             required: "This field is required",
           })}
-          disabled={isWorking}
+          disabled={isCreating}
           style={
             errors.description
               ? { border: "3px solid var(--color-red-700)" }
@@ -183,10 +149,8 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           id="image"
           accept="image/*"
           type="file"
-          disabled={isWorking}
-          {...register("image", {
-            required: isEditSession ? false : "This field is required",
-          })}
+          disabled={isCreating}
+          {...register("image")}
         />
       </FormRow>
 
@@ -194,9 +158,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button disabled={isWorking}>
-          {isEditSession ? "Edit Cabin" : "Create new Cabin"}
-        </Button>
+        <Button disabled={isCreating}>Add cabin</Button>
       </FormRow>
     </Form>
   );
