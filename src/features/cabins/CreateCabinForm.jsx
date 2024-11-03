@@ -40,7 +40,13 @@ function CreateCabinForm() {
   });
   // This function will be called when the form is submitted
   function onSubmit(data) {
-    mutate(data); // This will send the data to the server
+    // We need to send the image as a file, not as a FileList
+    // So we need to get the first file from the FileList
+    // And then we can send it to the server
+    // We can do this by using the spread operator
+    // This will create a new object with all the properties of the data object
+    // And then we can override the image property with the first file from the FileList
+    mutate({ ...data, image: data.image[0] });
   }
 
   return (
@@ -142,6 +148,7 @@ function CreateCabinForm() {
         <FileInput
           id="image"
           accept="image/*"
+          type="file"
           disabled={isCreating}
           {...register("image")}
         />
