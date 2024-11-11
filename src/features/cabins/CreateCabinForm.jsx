@@ -10,6 +10,8 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { createEditCabin } from "../../services/apiCabins";
 import FormRow from "../../ui/FormRow";
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
 const Label = styled.label`
   font-weight: 500;
@@ -32,39 +34,11 @@ function CreateCabinForm({ cabinToEdit = {} }) {
     defaultValues: isEditSession ? editValues : {}, // If we are editing a cabin, we need to pass the default values
   });
 
-  // This is the hook that will help us refetch the data
-  const queryClient = useQueryClient();
+  // Custom hook to create a cabin
+  const { isCreating, createCabin } = useCreateCabin();
 
-  // CREATE MUTATION
-  // This is the hook that will help us send the data to the server
-  const { mutate: createMutate, isLoading: isCreating } = useMutation({
-    mutationFn: createEditCabin,
-    onSuccess: () => {
-      toast.success("Cabin created successfully"); // This will show a success message
-      queryClient.invalidateQueries(["cabins"]); // This will refetch the data
-      reset(); // This will reset the form
-    },
-    onError: (error) => {
-      console.error("Error creating cabin", error.message);
-      toast.error("Error creating cabin");
-    },
-  });
-
-  // EDIT MUTATION
-  // This is the hook that will help us send the data to the server
-  const { mutate: editMutate, isLoading: isEditing } = useMutation({
-    // We need to pass the id of the cabin we are editing
-    mutationFn: ({ newCabinData, id }) => createEditCabin(newCabinData, id),
-    onSuccess: () => {
-      toast.success("Cabin edited successfully"); // This will show a success message
-      queryClient.invalidateQueries(["cabins"]); // This will refetch the data
-      reset(); // This will reset the form
-    },
-    onError: (error) => {
-      console.error("Error editing cabin", error.message);
-      toast.error("Error editing cabin");
-    },
-  });
+  // Custom hook to edit a cabin
+  const { isEditing, editCabin } = useEditCabin();
 
   // This is a ternary operator that will determine which mutation to use
   const isWorking = isCreating || isEditing;
@@ -78,9 +52,24 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
     // If we are editing a cabin, we need to call the edit mutation
     if (isEditSession)
-      editMutate({ newCabinData: { ...data, image }, id: editId });
+      editCabin(
+        { newCabinData: { ...data, image }, id: editId },
+        {
+          // You you can use onSuccess here and in the useEditCabin hook
+          // This will reset the form after the cabin is edited
+          onSuccess: (data) => reset(),
+        }
+      );
     // else we need to call the create mutation
-    else createMutate({ ...data, image: image });
+    else
+      createCabin(
+        { ...data, image: image },
+        {
+          // You you can use onSuccess here and in the useCreateCabin hook
+          // This will reset the form after the cabin is created
+          onSuccess: (data) => reset(),
+        }
+      );
   }
 
   return (
