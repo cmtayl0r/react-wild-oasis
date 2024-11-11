@@ -3,6 +3,8 @@ import { formatCurrency } from "../../utils/helpers";
 import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
+import { Copy, FilePenLine, Trash2 } from "lucide-react";
+import { useCreateCabin } from "./useCreateCabin";
 
 const TableRow = styled.div`
   display: grid;
@@ -47,6 +49,20 @@ function CabinRow({ cabin }) {
   const [showForm, setShowForm] = useState(false);
   // Custom hook to delete a cabin
   const { isDeleting, deleteCabin } = useDeleteCabin();
+  // Custom hook to create a cabin
+  const { isCreating, createCabin } = useCreateCabin();
+
+  // Handle the duplication of a cabin
+  function handleDuplicateCabin() {
+    // Duplicate the cabin by creating a new one with the same values
+    createCabin({
+      name: `${cabin.name} (Copy)`,
+      maxCapacity: cabin.maxCapacity,
+      regularPrice: cabin.regularPrice,
+      discount: cabin.discount,
+      image: cabin.image,
+    });
+  }
 
   const {
     id: cabinId,
@@ -70,9 +86,14 @@ function CabinRow({ cabin }) {
           <span>&mdash;</span>
         )}
         <div>
-          <button onClick={() => setShowForm((show) => !show)}>Edit</button>
+          <button onClick={() => handleDuplicateCabin()}>
+            <Copy />
+          </button>
+          <button onClick={() => setShowForm((show) => !show)}>
+            <FilePenLine />
+          </button>
           <button onClick={() => deleteCabin(cabinId)} disabled={isDeleting}>
-            Delete
+            <Trash2 />
           </button>
         </div>
       </TableRow>
