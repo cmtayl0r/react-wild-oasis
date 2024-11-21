@@ -44,7 +44,16 @@ const Button = styled.button`
     height: 2.4rem;
     /* Sometimes we need both */
     /* fill: var(--color-grey-500);
-    stroke: var(--color-grey-500); */
+    strokModale: var(--color-grey-500); */
     color: var(--color-grey-500);
   }
 `;
+
+function Modal({children}) {
+  return (
+    <StyledModal>{children}</StyledModal>
+  )
+}
+
+export default Modal
+
