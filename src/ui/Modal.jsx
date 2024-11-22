@@ -1,5 +1,12 @@
 import { X } from "lucide-react";
-import { cloneElement, createContext, useContext, useState } from "react";
+import {
+  cloneElement,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
@@ -79,11 +86,36 @@ function Open({ children, opens: opensWindowName }) {
 function ModalOverlay({ children, name }) {
   const { openName, close } = useContext(ModalContext);
 
+  const ref = useRef();
+
+  // Close the modal when the user presses the Escape key
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [close]);
+
+  // Close the modal when the user clicks outside of it
+  useEffect(() => {
+    function handleClick(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        close();
+      }
+    }
+    // Add event listener to handle clicks outside the modal
+    // true is an argument to addEventListener that tells the event listener to listen during the capture phase
+    // This is to avoid the event bubbling up to the document and closing the modal immediately
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [close]);
+
   if (name !== openName) return null;
 
   return createPortal(
     <Overlay>
-      <StyledModal>
+      <StyledModal ref={ref}>
         <Button onClick={close}>
           <X />
         </Button>
