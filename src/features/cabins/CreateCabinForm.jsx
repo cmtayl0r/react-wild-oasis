@@ -13,7 +13,7 @@ const Label = styled.label`
   font-weight: 500;
 `;
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   // We need to extract the id from the cabinToEdit object
   // And then we can use the rest operator to get the rest of the values
   const { id: editId, ...editValues } = cabinToEdit;
@@ -53,7 +53,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
         {
           // You you can use onSuccess here and in the useEditCabin hook
           // This will reset the form after the cabin is edited
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
     // else we need to call the create mutation
@@ -63,13 +66,19 @@ function CreateCabinForm({ cabinToEdit = {} }) {
         {
           // You you can use onSuccess here and in the useCreateCabin hook
           // This will reset the form after the cabin is created
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       {/* <FormRow>
         <Label htmlFor="name">Cabin name</Label>
 
@@ -176,7 +185,11 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       </FormRow>
 
       <FormRow>
-        <Button variation="secondary" type="reset">
+        <Button
+          onClick={() => onCloseModal?.()} // If onCloseModal is a function, call it
+          variation="secondary"
+          type="reset"
+        >
           Cancel
         </Button>
         <Button disabled={isWorking}>

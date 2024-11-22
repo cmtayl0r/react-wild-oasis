@@ -1,3 +1,6 @@
+import { X } from "lucide-react";
+import { cloneElement, createContext, useContext, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 const StyledModal = styled.div`
@@ -28,7 +31,8 @@ const Button = styled.button`
   background: none;
   border: none;
   padding: 0.4rem;
-  border-radius: var(--border-radius-sm);
+  /* border-radius: var(--border-radius-sm); */
+  border-radius: 100vw;
   transform: translateX(0.8rem);
   transition: all 0.2s;
   position: absolute;
@@ -40,8 +44,8 @@ const Button = styled.button`
   }
 
   & svg {
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
     /* Sometimes we need both */
     /* fill: var(--color-grey-500);
     strokModale: var(--color-grey-500); */
@@ -49,11 +53,48 @@ const Button = styled.button`
   }
 `;
 
-function Modal({children}) {
+const ModalContext = createContext();
+
+function Modal({ children }) {
+  const [openName, setOpenName] = useState(null);
+
+  const close = () => setOpenName(null);
+  const open = setOpenName;
+
   return (
-    <StyledModal>{children}</StyledModal>
-  )
+    <ModalContext.Provider value={{ open, close, openName }}>
+      {children}
+    </ModalContext.Provider>
+  );
 }
 
-export default Modal
+function Open({ children, opens: opensWindowName }) {
+  const { open } = useContext(ModalContext);
+  // explain the cloneElement
+  // https://reactjs.org/docs/react-api.html#cloneelement
 
+  return cloneElement(children, { onClick: () => open(opensWindowName) });
+}
+
+function ModalOverlay({ children, name }) {
+  const { openName, close } = useContext(ModalContext);
+
+  if (name !== openName) return null;
+
+  return createPortal(
+    <Overlay>
+      <StyledModal>
+        <Button onClick={close}>
+          <X />
+        </Button>
+        {cloneElement(children, { onCloseModal: close })}
+      </StyledModal>
+    </Overlay>,
+    document.body
+  );
+}
+
+Modal.Open = Open;
+Modal.Overlay = ModalOverlay;
+
+export default Modal;
