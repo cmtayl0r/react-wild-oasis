@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { getCabins } from "../services/apiCabins";
 import Heading from "../ui/Heading";
 import Row from "../ui/Row";
 import CabinTable from "../features/cabins/CabinTable";
@@ -7,8 +5,6 @@ import CabinTable from "../features/cabins/CabinTable";
 import AddCabin from "../features/cabins/AddCabin";
 
 function Cabins() {
-  
-
   // useEffect(() => {
   //   getCabins().then((cabins) => console.log(cabins));
   // });
@@ -20,7 +16,7 @@ function Cabins() {
       </Row>
       <Row>
         <CabinTable />
-        <AddCabin/>
+        <AddCabin />
       </Row>
     </>
   );

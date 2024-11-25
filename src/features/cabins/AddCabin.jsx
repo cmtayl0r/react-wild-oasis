@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Button from "../../ui/Button";
 import CreateCabinForm from "./CreateCabinForm";
 import Modal from "../../ui/Modal";
@@ -15,19 +14,11 @@ function AddCabin() {
           <CreateCabinForm />
         </Modal.Overlay>
       </Modal>
-
-      <Modal>
-        <Modal.Open opens="cabin-table">
-          <Button>Open Cabin table</Button>
-        </Modal.Open>
-        <Modal.Overlay name="cabin-table">
-          <CabinTable />
-        </Modal.Overlay>
-      </Modal>
     </>
   );
 }
 
+// Before creating a Compound Component
 // function AddCabin() {
 //   const [isOpenModal, setIsOpenModal] = useState(false);
 //   return (
