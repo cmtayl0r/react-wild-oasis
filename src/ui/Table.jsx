@@ -101,7 +101,13 @@ function Row({ children }) {
   );
 }
 
-function Body({ children }) {}
+// This component will render the data passed to it
+// data = array of objects
+// render = function to render each row
+function Body({ data, render }) {
+  if (!data.length) return <Empty>No data to show at the moment</Empty>;
+  return <div className="table-body">{data.map(render)}</div>;
+}
 
 // -----------------------------------------------------------------------------
 // 4 - Add Child component as properties to Parent component
