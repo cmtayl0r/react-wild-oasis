@@ -81,18 +81,27 @@ function Modal({ children }) {
 // 3 - Create Child components
 // -----------------------------------------------------------------------------
 
+// opens prop in Open, is the name of the modal to open
+// name prop in ModalOverlay, is the name of the modal to show
+// This way we can have multiple modals in the same page and open them independently
+
 function Open({ children, opens: opensWindowName }) {
   const { open } = useContext(ModalContext);
+  // Clones children and adds onClick event to open the modal
+  // Turns any child element into a trigger to open the modal
   return cloneElement(children, { onClick: () => open(opensWindowName) });
 }
 
 function ModalOverlay({ children, name }) {
   const { openName, close } = useContext(ModalContext);
   // Custom hook to close modal when clicking outside
+  // We use ref to get the reference to the modal element because we need to check if the click is outside of it
   const ref = useOutsideClick(close);
   // If the name of the modal is different from the openName, return null
   if (name !== openName) return null;
 
+  // We use createPortal to render the modal outside the normal DOM tree
+  // This is to avoid styling conflicts with the rest of the app
   return createPortal(
     <Overlay>
       <StyledModal ref={ref}>
@@ -100,6 +109,10 @@ function ModalOverlay({ children, name }) {
           <X />
         </Button>
         {cloneElement(children, { onCloseModal: close })}
+        {/* 
+          // We clone the children and add the onCloseModal prop
+          // We pass the onCloseModal function to the children
+        */}
       </StyledModal>
     </Overlay>,
     document.body

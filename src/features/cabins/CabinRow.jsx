@@ -1,10 +1,11 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
 import { Copy, FilePenLine, Trash2 } from "lucide-react";
 import { useCreateCabin } from "./useCreateCabin";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const TableRow = styled.div`
   display: grid;
@@ -46,7 +47,6 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
-  const [showForm, setShowForm] = useState(false);
   // Custom hook to delete a cabin
   const { isDeleting, deleteCabin } = useDeleteCabin();
   // Custom hook to create a cabin
@@ -74,31 +74,44 @@ function CabinRow({ cabin }) {
   } = cabin;
 
   return (
-    <>
-      <TableRow role="row">
-        <Img src={image} alt={name} />
-        <Cabin>{name}</Cabin>
-        <div>Fits up to {maxCapacity}</div>
-        <Price>{formatCurrency(regularPrice)}</Price>
-        {discount ? (
-          <Discount>{formatCurrency(discount)}%</Discount>
-        ) : (
-          <span>&mdash;</span>
-        )}
-        <div>
-          <button disabled={isCreating} onClick={() => handleDuplicateCabin()}>
-            <Copy />
-          </button>
-          <button onClick={() => setShowForm((show) => !show)}>
-            <FilePenLine />
-          </button>
-          <button onClick={() => deleteCabin(cabinId)} disabled={isDeleting}>
-            <Trash2 />
-          </button>
-        </div>
-      </TableRow>
-      {showForm && <CreateCabinForm cabinToEdit={cabin} />}
-    </>
+    <TableRow role="row">
+      <Img src={image} alt={name} />
+      <Cabin>{name}</Cabin>
+      <div>Fits up to {maxCapacity}</div>
+      <Price>{formatCurrency(regularPrice)}</Price>
+      {discount ? (
+        <Discount>{formatCurrency(discount)}%</Discount>
+      ) : (
+        <span>&mdash;</span>
+      )}
+      <div>
+        <button disabled={isCreating} onClick={() => handleDuplicateCabin()}>
+          <Copy />
+        </button>
+        <Modal>
+          <Modal.Open opens="edit">
+            <button>
+              <FilePenLine />
+            </button>
+          </Modal.Open>
+          <Modal.Overlay name="edit">
+            <CreateCabinForm cabinToEdit={cabin} />
+          </Modal.Overlay>
+          <Modal.Open opens="delete">
+            <button>
+              <Trash2 />
+            </button>
+          </Modal.Open>
+          <Modal.Overlay name="delete">
+            <ConfirmDelete
+              resourceName="cabins"
+              disabled={isDeleting}
+              onConfirm={() => deleteCabin(cabinId)}
+            />
+          </Modal.Overlay>
+        </Modal>
+      </div>
+    </TableRow>
   );
 }
 
