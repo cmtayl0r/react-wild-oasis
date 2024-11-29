@@ -7,6 +7,7 @@ import { useCreateCabin } from "./useCreateCabin";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
 
 // const TableRow = styled.div`
 //   display: grid;
@@ -53,17 +54,26 @@ function CabinRow({ cabin }) {
   // Custom hook to create a cabin
   const { isCreating, createCabin } = useCreateCabin();
 
-  // Handle the duplication of a cabin
-  function handleDuplicateCabin() {
-    // Duplicate the cabin by creating a new one with the same values
-    createCabin({
-      name: `${cabin.name} (Copy)`,
-      maxCapacity: cabin.maxCapacity,
-      regularPrice: cabin.regularPrice,
-      discount: cabin.discount,
-      image: cabin.image,
-    });
-  }
+  // // Handle the duplication of a cabin
+  // function handleDuplicateCabin() {
+
+  //   createCabin({
+  //     name: `${cabin.name} (Copy)`,
+  //     maxCapacity: cabin.maxCapacity,
+  //     regularPrice: cabin.regularPrice,
+  //     discount: cabin.discount,
+  //     image: cabin.image,
+  //   });
+  // }
+
+  // const {
+  //   id: cabinId,
+  //   name,
+  //   maxCapacity,
+  //   regularPrice,
+  //   discount,
+  //   image,
+  // } = cabin;
 
   const {
     id: cabinId,
@@ -72,7 +82,20 @@ function CabinRow({ cabin }) {
     regularPrice,
     discount,
     image,
+    description,
   } = cabin;
+
+  function handleDuplicate() {
+    // Duplicate the cabin by creating a new one with the same values
+    createCabin({
+      name: `Copy of ${name}`,
+      maxCapacity,
+      regularPrice,
+      discount,
+      image,
+      description,
+    });
+  }
 
   return (
     <Table.Row>
@@ -86,30 +109,42 @@ function CabinRow({ cabin }) {
         <span>&mdash;</span>
       )}
       <div>
-        <button disabled={isCreating} onClick={() => handleDuplicateCabin()}>
-          <Copy />
-        </button>
         <Modal>
-          <Modal.Open opens="edit">
-            <button>
-              <FilePenLine />
-            </button>
-          </Modal.Open>
-          <Modal.Overlay name="edit">
-            <CreateCabinForm cabinToEdit={cabin} />
-          </Modal.Overlay>
-          <Modal.Open opens="delete">
-            <button>
-              <Trash2 />
-            </button>
-          </Modal.Open>
-          <Modal.Overlay name="delete">
-            <ConfirmDelete
-              resourceName="cabins"
-              disabled={isDeleting}
-              onConfirm={() => deleteCabin(cabinId)}
-            />
-          </Modal.Overlay>
+          <Menus.Menu>
+            {/* The three dots button */}
+            <Menus.Toggle id={cabinId} />
+            {/* The dropdown menu */}
+            {/* Shared id between the toggle and the list so know which list to open */}
+            <Menus.List id={cabinId}>
+              {/* Menu buttons go here */}
+              {/* Regular menu button */}
+              <Menus.Button
+                icon={<Copy />}
+                onClick={handleDuplicate}
+                disabled={isCreating}
+              >
+                Duplicate
+              </Menus.Button>
+              {/* Menu button that opens a modal */}
+              <Modal.Open opens="edit">
+                <Menus.Button icon={<FilePenLine />}>Edit</Menus.Button>
+              </Modal.Open>
+              {/* Menu button that opens a modal */}
+              <Modal.Open opens="delete">
+                <Menus.Button icon={<Trash2 />}>Delete</Menus.Button>
+              </Modal.Open>
+            </Menus.List>
+            <Modal.Overlay name="edit">
+              <CreateCabinForm cabinToEdit={cabin} />
+            </Modal.Overlay>
+            <Modal.Overlay name="delete">
+              <ConfirmDelete
+                resourceName="cabins"
+                disabled={isDeleting}
+                onConfirm={() => deleteCabin(cabinId)}
+              />
+            </Modal.Overlay>
+          </Menus.Menu>
         </Modal>
       </div>
     </Table.Row>
